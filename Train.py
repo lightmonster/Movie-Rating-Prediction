@@ -24,12 +24,9 @@ class Movie:
         self.year = year
         self.genre = genre
 
-
-
 #Function defined here
 def min_max (min_a, max_a, v):
     return 7*(v-min_a)/(max_a-min_a)
-
 
 #init GYlist
 for i in range(19):
@@ -81,46 +78,46 @@ for n, line in enumerate(data, 1):
     cur_movie_y = dict_movie[cur_entry[2]].year
     gy_x = -1
     gy_y = -1
-
     #decide location
-    if (cur_movie_g == "Action"):
-        gy_x = 0
-    elif (cur_movie_g == "Adventure"):
-        gy_x = 1
-    elif (cur_movie_g == "Animation"):
-        gy_x = 2
-    elif (cur_movie_g == "Children's"):
-        gy_x = 3
-    elif (cur_movie_g == "Comedy"):
-        gy_x = 4
-    elif (cur_movie_g == "Crime"):
-        gy_x = 5
-    elif (cur_movie_g == "Documentary"):
-        gy_x = 6
-    elif (cur_movie_g == "Drama"):
-        gy_x = 7
-    elif (cur_movie_g == "Fantasy"):
-        gy_x = 8
-    elif (cur_movie_g == "Film-Noir"):
-        gy_x = 9
-    elif (cur_movie_g == "Horror"):
-        gy_x = 10
-    elif (cur_movie_g == "Mystery"):
-        gy_x = 11
-    elif (cur_movie_g == "Musical"):
-        gy_x = 12
-    elif (cur_movie_g == "Romance"):
-        gy_x = 13
-    elif (cur_movie_g == "Sci-Fi"):
-        gy_x = 14
-    elif (cur_movie_g == "Thriller"):
-        gy_x = 15
-    elif (cur_movie_g == "War"):
-        gy_x = 16
-    elif (cur_movie_g == "None"):
-        gy_x = 17
-    else:
+    if (cur_movie_g == None):
         gy_x = 18
+    elif ("Action" in cur_movie_g):
+        gy_x = 0
+    elif ("Adventure" in cur_movie_g):
+        gy_x = 1
+    elif ("Animation" in cur_movie_g):
+        gy_x = 2
+    elif ("Children's" in cur_movie_g):
+        gy_x = 3
+    elif ("Comedy" in cur_movie_g):
+        gy_x = 4
+    elif ("Crime" in cur_movie_g):
+        gy_x = 5
+    elif ("Documentary" in cur_movie_g):
+        gy_x = 6
+    elif ("Drama" in cur_movie_g):
+        gy_x = 7
+    elif ("Fantasy" in cur_movie_g):
+        gy_x = 8
+    elif ("Film-Noir" in cur_movie_g):
+        gy_x = 9
+    elif ("Horror" in cur_movie_g):
+        gy_x = 10
+    elif ("Mystery" in cur_movie_g):
+        gy_x = 11
+    elif ("Musical" in cur_movie_g):
+        gy_x = 12
+    elif ("Romance" in cur_movie_g):
+        gy_x = 13
+    elif ("Sci-Fi" in cur_movie_g):
+        gy_x = 14
+    elif ("Thriller" in cur_movie_g):
+        gy_x = 15
+    elif ("War" in cur_movie_g):
+        gy_x = 16
+    else:
+        gy_x = 17
+
     #for none data
     if (cur_movie_y == None):
         gy_y = 8
@@ -129,12 +126,7 @@ for n, line in enumerate(data, 1):
     #Assign tuple to location
     GYlist[gy_x][gy_y].append(cur_tuple)
 
-print GYlist
-
-# for row in user_dict.values():
-#     for ele in row:
-#         print ele.movie
-
+print GYlist[0][0]
 
 #Recycle bin
 
