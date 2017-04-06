@@ -79,7 +79,7 @@ def print_dict_m (d):
 
 # Extract Data: User
 
-file_ = open("user.txt", "r")
+file_ = open(sys.argv[2], "r")
 
 for line in file_:
     lines.append(line)
@@ -96,7 +96,7 @@ for i in range(1,count_user + 1):
 
 # Extract Data: Movie
 
-read_movie = open("movie.txt", "r")
+read_movie = open(sys.argv[3], "r")
 
 for line in read_movie:
     if num_movie != -1:
@@ -143,7 +143,7 @@ for i in range(num_genre+1):
 
 # Extract Data: Train
 
-with open("train.txt") as f:
+with open(sys.argv[1]) as f:
     data = f.readlines()
 
 def min_max (min_a, max_a, v):
@@ -241,8 +241,8 @@ for i in range(num_genre+1):
         rating_list = np.array(rating_list)
         model[i][j] = regression (user_list, rating_list)
 
-def calculate_rating (b_list, err, x_list):
-    return np.dot(b_list, x_list) + err
+def calculate_rating (model, x_list):
+    return np.dot(model[0], x_list)+model[1]
 
 def get_expected_rating(user, movie):
     genre_list = dict_movie[movie].genre
@@ -273,13 +273,23 @@ def get_expected_rating(user, movie):
         else:
             occupation = int(user.occupation)
         x_list = np.array([gender,age,occupation])
-        rate = calculate_rating (model[gy_x][gy_y][0],model[gy_x][gy_y][1],x_list)
+        if model[gy_x][gy_y] == None: # not enough info
+            if model[18][gy_y] != None:
+                rate = calculate_rating (model[18][gy_y],x_list)
+            elif model[gy_x][8] != None:
+                rate = calculate_rating (model[gy_x][8],x_list)
+            elif model[18][8] != None:
+                rate = calculate_rating (model[18][8],x_list)
+            else:
+                rate = 3.0
+        else:
+            rate = calculate_rating (model[gy_x][gy_y],x_list)
         rating_list.append(rate)
 	return np.mean(rating_list)
 
 # Predict
 
-file_test = open("test.txt","r")
+file_test = open(sys.argv[4],"r")
 line_test = []
 for line in file_test:
 	line_test.append(line)
