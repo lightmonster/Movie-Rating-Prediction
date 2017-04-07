@@ -294,6 +294,8 @@ line_test = []
 for line in file_test:
 	line_test.append(line)
 
+print "Id,rating"
+
 for i in range(1, len(line_test)):
     parse_line = (line_test[i].strip()).split(",")
     rating = int(get_expected_rating(parse_line[1],parse_line[2]))
