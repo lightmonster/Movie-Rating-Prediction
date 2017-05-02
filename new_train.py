@@ -14,16 +14,18 @@ df_user = pd.read_csv('user.csv')
 df_movie = pd.read_csv('movie.csv')
 df_train = pd.read_csv('train.csv')
 df_test = pd.read_csv('test.csv')
+piv_train = df_train.shape[0]#get the dimension
+labels = df_train['rating'].values#the attr that we want to predict
+
+
 #Preprocess
 ##Add test data
 frames = [df_train, df_test]
 df_train = pd.concat(frames)
 print df_train
 ##Collect some useful information
-labels = df_train['rating'].values#the attr that we want to predict
 uid_test = df_test['user-Id']#df type
 mid_test = df_test['movie-Id']#df type
-piv_train = df_train.shape[0]#get the dimension
 id_test = df_test['Id']
 
 ##Modify column label for joining
@@ -59,8 +61,8 @@ print df_train
 
 #Mining data
 ##One-hot-encoding
-# ohe_element = ['Gender','Occupation','Genre','rating']
-ohe_element = ['Gender','Occupation','rating']
+ohe_element = ['Gender','Occupation','Genre','rating']
+# ohe_element = ['Gender','Occupation','rating']
 for e in ohe_element:
     dummy_table = pd.get_dummies(df_train[e],prefix = e)
     df_train = df_train.drop([e], axis=1)
@@ -76,7 +78,6 @@ df_train.drop(['user-Id','movie-Id'],axis=1)
 
 
 #MLR
-print "MLR"
 v = df_train.values
 X = v[:piv_train]
 X_test = v[piv_train:]
@@ -85,8 +86,11 @@ LE = LabelEncoder()
 Y = LE.fit_transform(labels)
 # print Y
 
+print "MLR"
 model = MLR()
+print "fit"
 model.fit(X, Y)
+print "predict"
 predict_prob = model.predict_proba(X_test)
 
 print (predict_prob)
@@ -95,7 +99,7 @@ ids, cts = [], []
 for i in range(len(id_test)):
     idx = id_test[i]
     ids += [idx]*5
-    cts += le.inverse_transform(np.argsort(predict_prob[i])[::-1])[:5].tolist()
+    cts += LE.inverse_transform(np.argsort(predict_prob[i])[::-1])[:5].tolist()
 
 # generate submission file
 sub = pd.DataFrame(np.column_stack((ids, cts)),columns=['id', 'rating'])
