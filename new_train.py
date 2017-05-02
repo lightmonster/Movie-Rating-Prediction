@@ -5,6 +5,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from dt import ID3Classifier
 from lr import MLR
 from regressionCalculation import regression
+import sklearn.naive_bayes as nb
+
 
 np.random.seed(0)
 
@@ -49,7 +51,7 @@ dim_train = df_train.shape#dimension of the df: (802762, 9)
 df_train = df_train.drop(['Id'], axis=1)
 ##Fill NaN (except for Gender and Genre)
 columns = df_train.columns.values[:-1]
-columns = np.delete(columns, 3)
+# columns = np.delete(columns, 3)
 df_train[columns] = df_train[columns].fillna(-1)
 ##Handle invalid(wierd) age data
 age = df_train.Age.values
@@ -61,7 +63,7 @@ print df_train
 
 #Mining data
 ##One-hot-encoding
-ohe_element = ['Gender','Occupation','Genre','rating']
+ohe_element = ['Gender','Occupation','Genre']
 # ohe_element = ['Gender','Occupation','rating']
 for e in ohe_element:
     dummy_table = pd.get_dummies(df_train[e],prefix = e)
@@ -73,7 +75,7 @@ for e in ohe_element:
 # test.to_csv('df_train.csv', index=False)
 
 #Drop first two columns for predicting
-df_train.drop(['user-Id','movie-Id'],axis=1)
+# df_train.drop(['user-Id','movie-Id'],axis=1)
 # df_train.drop(['Genre'],axis=1)
 
 
@@ -81,17 +83,19 @@ df_train.drop(['user-Id','movie-Id'],axis=1)
 v = df_train.values
 X = v[:piv_train]
 X_test = v[piv_train:]
-# print X
+print X
 LE = LabelEncoder()
 Y = LE.fit_transform(labels)
-# print Y
+print Y
 
 print "MLR"
-model = MLR()
+# model = MLR()
+model = nb.BernoulliNB()
 print "fit"
 model.fit(X, Y)
 print "predict"
 predict_prob = model.predict_proba(X_test)
+
 
 print (predict_prob)
 
