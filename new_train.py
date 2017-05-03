@@ -2,11 +2,12 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
 from dt import ID3Classifier
 from lr import MLR
 from regressionCalculation import regression
+from sklearn import tree
 import sklearn.naive_bayes as nb
-
 
 np.random.seed(0)
 
@@ -18,9 +19,11 @@ df_train = pd.read_csv('train.csv')
 df_test = pd.read_csv('test.csv')
 piv_train = df_train.shape[0]#get the dimension
 labels = df_train['rating'].values#the attr that we want to predict
+df_train = df_train.drop(['rating'],axis=1)
 
 
-#Preprocess
+#Preprocessing
+
 ##Add test data
 frames = [df_train, df_test]
 df_train = pd.concat(frames)
@@ -57,40 +60,87 @@ df_train[columns] = df_train[columns].fillna(-1)
 age = df_train.Age.values
 df_train['Age'] = np.where(np.logical_or(age<15, age>100), -1, age)
 ##Switch columns for better understanding
-df_train = df_train[['user-Id','movie-Id','Age','Year','Gender','Occupation','Genre','rating']]
+df_train = df_train[['user-Id','movie-Id','Age','Year','Gender','Occupation','Genre']]
 print df_train
 # print pd.cut(df_train['Year'],8,retbins=True)
 
+
 #Mining data
 ##One-hot-encoding
-ohe_element = ['Gender','Occupation','Genre']
-# ohe_element = ['Gender','Occupation','rating']
+# ohe_element = ['Gender','Occupation','Genre','rating']
+ohe_element = ['Gender','Occupation']
+print df_train.shape
 for e in ohe_element:
     dummy_table = pd.get_dummies(df_train[e],prefix = e)
     df_train = df_train.drop([e], axis=1)
     df_train = pd.concat((df_train, dummy_table), axis=1)
+    # print df_train.shape
 
-##Output for debugging
-# test = pd.DataFrame(df_train)
-# test.to_csv('df_train.csv', index=False)
+##Reduce dimension of Genre
+genre_list = []
+for genre in df_movie['Genre'].values:
+    if type(genre)==str:
+        genre = genre.split("|")
+        for g in genre:
+            if g not in genre_list:
+                genre_list.append(g)
+print genre_list
+genre_dict = dict()
+for i in range(len(genre_list)):
+    genre_dict[genre_list[i]] = i
+print genre_dict
+genre_table = np.zeros((df_train.shape[0],len(genre_list)))
+print genre_table.shape # (1000209, 18)
+
+movie_value = df_train['Genre'].values #the attr that we want to predict
+print movie_value.shape # (1000209,)
+
+for i in range(len(movie_value)):
+    if type(movie_value[i])==str:
+        genre = movie_value[i].split("|")
+        for g in genre:
+            genre_table[i][genre_dict[g]] = 1
+print genre_table
+
+print df_train.shape
+
+df_train = df_train.drop(['Genre'], axis=1)
+df_train = pd.concat((df_train, pd.DataFrame(genre_table)), axis=1)
+print df_train
+
+#Mining data
+##One-hot-encoding
+# ohe_element = ['Gender','Occupation','Genre']
+# # ohe_element = ['Gender','Occupation','rating']
+# for e in ohe_element:
+#     dummy_table = pd.get_dummies(df_train[e],prefix = e)
+#     df_train = df_train.drop([e], axis=1)
+#     df_train = pd.concat((df_train, dummy_table), axis=1)
 
 #Drop first two columns for predicting
-# df_train.drop(['user-Id','movie-Id'],axis=1)
+df_train.drop(['user-Id','movie-Id'],axis=1)
 # df_train.drop(['Genre'],axis=1)
 
 
-#MLR
+##Output for debugging
+test = pd.DataFrame(df_train)
+test.to_csv('df_train.csv', index=False)
+
+
+#Alg
 v = df_train.values
 X = v[:piv_train]
 X_test = v[piv_train:]
-print X
+# print X
 LE = LabelEncoder()
 Y = LE.fit_transform(labels)
-print Y
+# print Y
 
 print "MLR"
 # model = MLR()
-model = nb.BernoulliNB()
+model = nb.BernoulliNB()#Highest score
+# model = RandomForestClassifier(n_estimators=500,min_samples_split=200)
+# model = tree.DecisionTreeClassifier()
 print "fit"
 model.fit(X, Y)
 print "predict"
@@ -102,13 +152,9 @@ print (predict_prob)
 ids, cts = [], []
 for i in range(len(id_test)):
     idx = id_test[i]
-    ids += [idx]*5
-    cts += LE.inverse_transform(np.argsort(predict_prob[i])[::-1])[:5].tolist()
+    ids += [idx]
+    cts += LE.inverse_transform(np.argsort(predict_prob[i])[::-1])[:1].tolist()
 
 # generate submission file
 sub = pd.DataFrame(np.column_stack((ids, cts)),columns=['id', 'rating'])
 sub.to_csv('sub.csv',index=False)
-
-
-#Concerns: Probably need to exclude IDs when doing mlr;
-#          How to use Ids to reflect training result
