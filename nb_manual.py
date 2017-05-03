@@ -1,7 +1,8 @@
 from __future__ import division
 import numpy as np
 
-#Instruction:
+
+# Instruction:
 # import nb_manual as nb
 # model = nb.BernoulliNB()
 # model.fit(X,Y)
@@ -9,12 +10,11 @@ import numpy as np
 
 
 class BernoulliNB(object):
-    def __init__(self, alpha=1.0):
+    def __init__(self, alpha=0.8):
         self.alpha = alpha
         self.binarize = 0.6
         self.class_log_prior_ = None
         self.feature_prob_ = None
-
 
     def fit(self, X, y):
         X = self._binarize_X(X)
@@ -29,13 +29,12 @@ class BernoulliNB(object):
 
     def predict_log_proba(self, X):
         X = self._binarize_X(X)
-        return [(np.log(self.feature_prob_) * x + \
-                 np.log(1 - self.feature_prob_) * np.abs(x - 1)
-                ).sum(axis=1) + self.class_log_prior_ for x in X]
+        return [(np.log(self.feature_prob_) * x + np.log(1 - self.feature_prob_) * np.abs(x - 1)
+                 ).sum(axis=1) + self.class_log_prior_ for x in X]
 
     def predict(self, X):
         X = self._binarize_X(X)
         return np.argmax(self.predict_log_proba(X), axis=1)
 
     def _binarize_X(self, X):
-        return np.where(X > self.binarize, 1, 0) if self.binarize != None else X
+        return np.where(X > self.binarize, 1, 0) if self.binarize is not None else X
