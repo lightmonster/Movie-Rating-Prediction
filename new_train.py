@@ -27,7 +27,7 @@ df_train = df_train.drop(['rating'],axis=1)
 ##Add test data
 frames = [df_train, df_test]
 df_train = pd.concat(frames)
-print df_train
+# print df_train
 ##Collect some useful information
 uid_test = df_test['user-Id']#df type
 mid_test = df_test['movie-Id']#df type
@@ -52,70 +52,92 @@ dim_train = df_train.shape#dimension of the df: (802762, 9)
 # print dim_train
 ##Drop useless attr
 df_train = df_train.drop(['Id'], axis=1)
+
+df_train['Gender'] = df_train['Gender'].replace(np.nan, 'M')
+df_train['Age'] = df_train['Age'].fillna(df_train['Age'].mean())
+df_train['Occupation'] = df_train['Occupation'].fillna(df_train['Occupation'].mean())
+df_train['Year'] = df_train['Year'].fillna(df_train['Year'].mean())
+
 ##Fill NaN (except for Gender and Genre)
 columns = df_train.columns.values[:-1]
 # columns = np.delete(columns, 3)
 df_train[columns] = df_train[columns].fillna(-1)
 ##Handle invalid(wierd) age data
 age = df_train.Age.values
-df_train['Age'] = np.where(np.logical_or(age<15, age>100), -1, age)
+# age
+# df_train['Age'] = np.where(np.logical_or(age<15), -1, age)
+# df_train['Age'] = np.where(np.logical_and(age<25, age>=15), 0, age)
+# df_train['Age'] = np.where(np.logical_and(age<35, age>=25), 1, age)
+# df_train['Age'] = np.where(np.logical_and(age<45, age>=35), 2, age)
+# df_train['Age'] = np.where(age>=45, 3, age)
+# year
+year = df_train.Year.values
+df_train['Year'] = np.where(year<1930, 0, year)
+df_train['Year'] = np.where(np.logical_and(year>=1930, year<1940), 1, year)
+df_train['Year'] = np.where(np.logical_and(year>=1940, year<1950), 2, year)
+df_train['Year'] = np.where(np.logical_and(year>=1950, year<1960), 3, year)
+df_train['Year'] = np.where(np.logical_and(year>=1960, year<1970), 4, year)
+df_train['Year'] = np.where(np.logical_and(year>=1970, year<1980), 5, year)
+df_train['Year'] = np.where(np.logical_and(year>=1980, year<1990), 6, year)
+df_train['Year'] = np.where(year>=1990, 7, year)
+
 ##Switch columns for better understanding
 df_train = df_train[['user-Id','movie-Id','Age','Year','Gender','Occupation','Genre']]
-print df_train
+# print df_train
 # print pd.cut(df_train['Year'],8,retbins=True)
 
 
 #Mining data
 ##One-hot-encoding
 # ohe_element = ['Gender','Occupation','Genre','rating']
-ohe_element = ['Gender','Occupation']
-print df_train.shape
-for e in ohe_element:
-    dummy_table = pd.get_dummies(df_train[e],prefix = e)
-    df_train = df_train.drop([e], axis=1)
-    df_train = pd.concat((df_train, dummy_table), axis=1)
-    # print df_train.shape
-
-##Reduce dimension of Genre
-genre_list = []
-for genre in df_movie['Genre'].values:
-    if type(genre)==str:
-        genre = genre.split("|")
-        for g in genre:
-            if g not in genre_list:
-                genre_list.append(g)
-print genre_list
-genre_dict = dict()
-for i in range(len(genre_list)):
-    genre_dict[genre_list[i]] = i
-print genre_dict
-genre_table = np.zeros((df_train.shape[0],len(genre_list)))
-print genre_table.shape # (1000209, 18)
-
-movie_value = df_train['Genre'].values #the attr that we want to predict
-print movie_value.shape # (1000209,)
-
-for i in range(len(movie_value)):
-    if type(movie_value[i])==str:
-        genre = movie_value[i].split("|")
-        for g in genre:
-            genre_table[i][genre_dict[g]] = 1
-print genre_table
-
-print df_train.shape
-
-df_train = df_train.drop(['Genre'], axis=1)
-df_train = pd.concat((df_train, pd.DataFrame(genre_table)), axis=1)
-print df_train
-
-#Mining data
-##One-hot-encoding
-# ohe_element = ['Gender','Occupation','Genre']
-# # ohe_element = ['Gender','Occupation','rating']
+# ohe_element = ['Gender','Occupation','Age','Year']
+# # print df_train.shape
 # for e in ohe_element:
 #     dummy_table = pd.get_dummies(df_train[e],prefix = e)
 #     df_train = df_train.drop([e], axis=1)
 #     df_train = pd.concat((df_train, dummy_table), axis=1)
+#     # print df_train.shape
+#
+# ##Reduce dimension of Genre
+# genre_list = []
+# for genre in df_movie['Genre'].values:
+#     if type(genre)==str:
+#         genre = genre.split("|")
+#         for g in genre:
+#             if g not in genre_list:
+#                 genre_list.append(g)
+# # print genre_list
+# genre_dict = dict()
+# for i in range(len(genre_list)):
+#     genre_dict[genre_list[i]] = i
+# # print genre_dict
+# genre_table = np.zeros((df_train.shape[0],len(genre_list)))
+# # print genre_table.shape # (1000209, 18)
+#
+# movie_value = df_train['Genre'].values #the attr that we want to predict
+# # print movie_value.shape # (1000209,)
+#
+# for i in range(len(movie_value)):
+#     if type(movie_value[i])==str:
+#         genre = movie_value[i].split("|")
+#         for g in genre:
+#             genre_table[i][genre_dict[g]] = 1
+# # print genre_table
+#
+# # print df_train.shape
+#
+# df_train = df_train.drop(['Genre'], axis=1)
+# df_train = pd.concat((df_train, pd.DataFrame(genre_table)), axis=1)
+# print df_train
+
+# Mining data
+#One-hot-encoding
+ohe_element = ['Gender','Occupation','Genre','Age','Year']
+# ohe_element = ['Gender','Occupation','rating']
+for e in ohe_element:
+    dummy_table = pd.get_dummies(df_train[e],prefix = e)
+    df_train = df_train.drop([e], axis=1)
+    df_train = pd.concat((df_train, dummy_table), axis=1)
 
 #Drop first two columns for predicting
 df_train.drop(['user-Id','movie-Id'],axis=1)
@@ -123,8 +145,8 @@ df_train.drop(['user-Id','movie-Id'],axis=1)
 
 
 ##Output for debugging
-test = pd.DataFrame(df_train)
-test.to_csv('df_train.csv', index=False)
+# test = pd.DataFrame(df_train)
+# test.to_csv('df_train.csv', index=False)
 
 
 #Alg
