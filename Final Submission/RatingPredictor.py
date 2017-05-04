@@ -6,7 +6,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-import nb_manual as nb
+import nb_manual_comment as nb
 
 # Read data from txt files
 print ("Read data")
